@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hourly Sales Entry — Alan Scott Retail Limited</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1a2b3c;
+    --navy-dark: #0f1e2b;
+    --navy-mid: #243447;
+    --orange: #f5a623;
+    --orange-dark: #e09010;
+    --white: #ffffff;
+    --light: #f4f6f9;
+    --muted: #8a9bb0;
+    --border: #2e4057;
+    --success: #27ae60;
+    --error: #e74c3c;
+    --locked: #c0392b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--navy-dark);
+    min-height: 100vh;
+    color: var(--white);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(245,166,35,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(26,43,60,0.9) 0%, transparent 60%);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--navy-dark);
+    border-bottom: 3px solid var(--orange);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  .logo-svg {
+    display: block;
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--border);
+    margin: 0 8px;
+  }
+
+  .header-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .header-time {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .current-time {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--orange);
+    letter-spacing: 0.04em;
+  }
+
+  .current-date {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── MAIN CONTAINER ── */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+  }
+
+  .page-heading {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 6px;
+  }
+
+  .page-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: 0.02em;
+    margin-bottom: 32px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--navy-mid);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--orange), transparent);
+  }
+
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── FORM GRID ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group.full {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  label span.req {
+    color: var(--orange);
+    margin-left: 2px;
+  }
+
+  select, input[type="text"], input[type="number"], input[type="date"] {
+    background: var(--navy-dark);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 12px 14px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a9bb0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+
+  select:focus, input:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
+  }
+
+  select option {
+    background: var(--navy-dark);
+    color: var(--white);
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    opacity: 0.4;
+  }
+
+  /* ── HOUR SLOTS ── */
+  .hour-slot {
+    background: var(--navy-dark);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+
+  .hour-slot.active {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.08);
+  }
+
+  .hour-slot.submitted {
+    border-color: var(--success);
+    opacity: 0.7;
+  }
+
+  .hour-slot.locked {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .hour-slot-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .hour-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--white);
+  }
+
+  .slot-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .slot-badge.active { background: rgba(245,166,35,0.15); color: var(--orange); }
+  .slot-badge.submitted { background: rgba(39,174,96,0.15); color: var(--success); }
+  .slot-badge.pending { background: rgba(138,155,176,0.1); color: var(--muted); }
+
+  .slot-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+
+  .slot-fields input {
+    font-size: 14px;
+    padding: 9px 12px;
+  }
+
+  .slot-fields label {
+    font-size: 10px;
+  }
+
+  /* ── SUBMIT BUTTON ── */
+  .btn-submit {
+    background: var(--orange);
+    color: var(--navy-dark);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-submit:hover { background: var(--orange-dark); }
+  .btn-submit:active { transform: scale(0.99); }
+  .btn-submit:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ── LOCKED MESSAGE ── */
+  .lock-overlay {
+    display: none;
+    background: rgba(15,30,43,0.96);
+    border: 1.5px solid var(--locked);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .lock-overlay.show { display: block; }
+
+  .lock-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+
+  .lock-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--locked);
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+
+  .lock-msg {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .next-unlock {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  /* ── SUCCESS TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--success);
+    color: white;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 999;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 4px;
+    height: 4px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), #ffca6e);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .header { padding: 14px 16px; }
+    .container { padding: 24px 14px 50px; }
+    .card { padding: 20px 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .slot-fields { grid-template-columns: 1fr; }
+    .page-title { font-size: 28px; }
+    .current-time { font-size: 18px; }
+  }
+
+  /* ── DASHBOARD ── */
+  .dashboard-wrap {
+    background: var(--navy-dark);
+    border-top: 3px solid var(--orange);
+    padding: 40px 20px 60px;
+    margin-top: 20px;
+  }
+  .dashboard-inner { max-width: 1200px; margin: 0 auto; }
+  .dashboard-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+  .dash-label { font-family: "Barlow Condensed", sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--orange); margin-bottom: 4px; }
+  .dash-title { font-family: "Barlow Condensed", sans-serif; font-size: 30px; font-weight: 800; color: var(--white); letter-spacing: 0.02em; }
+  .dash-meta { font-size: 12px; color: var(--muted); text-align: right; }
+  .dash-date { font-family: "Barlow Condensed", sans-serif; font-size: 16px; font-weight: 700; color: var(--orange); }
+  .btn-refresh { background: transparent; border: 1.5px solid var(--border); border-radius: 8px; color: var(--muted); font-family: "Barlow Condensed", sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 18px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .btn-refresh:hover { border-color: var(--orange); color: var(--orange); }
+  .btn-refresh.spinning .refresh-icon { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .stat-card { background: var(--navy-mid); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .stat-value { font-family: "Barlow Condensed", sans-serif; font-size: 28px; font-weight: 800; color: var(--white); line-height: 1; }
+  .stat-value.orange { color: var(--orange); }
+  .stat-value.green { color: var(--success); }
+  .view-toggle { display: flex; gap: 0; margin-bottom: 20px; background: var(--navy-mid); border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; }
+  .toggle-btn { background: transparent; border: none; border-radius: 7px; color: var(--muted); font-family: "Barlow Condensed", sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 20px; cursor: pointer; transition: all 0.2s; }
+  .toggle-btn.active { background: var(--orange); color: var(--navy-dark); }
+  .dash-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  .dash-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .dash-table thead tr { background: var(--navy-mid); }
+  .dash-table thead th { font-family: "Barlow Condensed", sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); padding: 12px 16px; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border); }
+  .dash-table thead th.num { text-align: right; }
+  .dash-table tbody tr { border-bottom: 1px solid rgba(46,64,87,0.5); transition: background 0.15s; }
+  .dash-table tbody tr:hover { background: rgba(245,166,35,0.04); }
+  .dash-table tbody tr:last-child { border-bottom: none; }
+  .dash-table td { padding: 11px 16px; color: var(--white); white-space: nowrap; }
+  .dash-table td.num { text-align: right; font-family: "Barlow Condensed", sans-serif; font-size: 15px; font-weight: 600; }
+  .dash-table td.sales-val { color: var(--orange); }
+  .dash-table td.txn-val { color: #7fc8e3; }
+  .dash-table td.staff-val { color: #a8e6b0; }
+  .store-badge { display: inline-block; background: rgba(245,166,35,0.12); color: var(--orange); font-family: "Barlow Condensed", sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; padding: 2px 8px; border-radius: 4px; margin-right: 6px; }
+  .store-group { background: var(--navy-mid); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+  .store-group-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: rgba(26,43,60,0.6); border-bottom: 1px solid var(--border); cursor: pointer; }
+  .store-group-header:hover { background: rgba(245,166,35,0.05); }
+  .store-group-name { font-family: "Barlow Condensed", sans-serif; font-size: 18px; font-weight: 700; color: var(--white); letter-spacing: 0.04em; }
+  .store-group-totals { display: flex; gap: 20px; align-items: center; }
+  .store-total-label { font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; }
+  .store-total-val { font-family: "Barlow Condensed", sans-serif; font-size: 16px; font-weight: 700; }
+  .store-total-val.s { color: var(--orange); }
+  .store-total-val.t { color: #7fc8e3; }
+  .hour-group { background: var(--navy-mid); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+  .hour-group-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: rgba(26,43,60,0.6); border-bottom: 1px solid var(--border); }
+  .hour-group-label { font-family: "Barlow Condensed", sans-serif; font-size: 17px; font-weight: 700; color: var(--white); }
+  .hour-slot-count { font-size: 11px; color: var(--muted); }
+  .dash-loading { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .spin-ring { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  .dash-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
+  .dash-empty .empty-icon { font-size: 36px; margin-bottom: 12px; }
+  @media (max-width: 700px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } .dash-table td, .dash-table th { padding: 10px 10px; } }
+
+
+  /* ── DASHBOARD STYLES ── */
+  .dashboard-wrap {
+    background: var(--navy-dark);
+    border-top: 3px solid var(--orange);
+    padding: 40px 20px 80px;
+  }
+  .dashboard-inner { max-width: 1300px; margin: 0 auto; }
+  .dashboard-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 28px;
+  }
+  .dash-label { font-family: 'Barlow Condensed',sans-serif; font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--orange); margin-bottom: 4px; }
+  .dash-title { font-family: 'Barlow Condensed',sans-serif; font-size: 30px; font-weight: 800; color: var(--white); }
+  .dash-meta { font-size: 12px; color: var(--muted); text-align: right; }
+  .dash-date { font-family: 'Barlow Condensed',sans-serif; font-size: 15px; font-weight: 700; color: var(--orange); }
+  .btn-refresh { background: transparent; border: 1.5px solid var(--border); border-radius: 8px; color: var(--muted); font-family: 'Barlow Condensed',sans-serif; font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; padding: 8px 18px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 6px; }
+  .btn-refresh:hover { border-color: var(--orange); color: var(--orange); }
+  .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 28px; }
+  .stat-card { background: var(--navy-mid); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .stat-label { font-size: 10px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .stat-value { font-family: 'Barlow Condensed',sans-serif; font-size: 28px; font-weight: 800; color: var(--white); line-height: 1; }
+  .stat-value.orange { color: var(--orange); }
+  .stat-value.green { color: var(--success); }
+  .dash-section-title { font-family: 'Barlow Condensed',sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .dash-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); background: var(--navy-mid); }
+  .dash-tbl { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+  .dash-tbl thead tr { background: rgba(26,43,60,0.8); }
+  .dash-tbl thead th { font-family: 'Barlow Condensed',sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  .dash-tbl thead th.r { text-align: right; }
+  .dash-tbl tbody tr { border-bottom: 1px solid rgba(46,64,87,.4); transition: background .15s; }
+  .dash-tbl tbody tr:last-child { border-bottom: none; }
+  .dash-tbl tbody tr:hover { background: rgba(245,166,35,.04); }
+  .dash-tbl td { padding: 10px 14px; color: var(--white); font-size: 13px; }
+  .dash-tbl td.r { text-align: right; font-family: 'Barlow Condensed',sans-serif; font-size: 14px; font-weight: 600; }
+  .dash-tbl td.sales { color: var(--orange); }
+  .dash-tbl td.txn { color: #7fc8e3; }
+  .dash-tbl td.staff-val { color: #a8e6b0; }
+  .dash-tbl td.sps { color: #c8a8e6; }
+  .pill-up { display:inline-block; background: rgba(39,174,96,.15); color: var(--success); font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; padding:2px 9px; border-radius:20px; }
+  .pill-dn { display:inline-block; background: rgba(231,76,60,.15); color: #e74c3c; font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; padding:2px 9px; border-radius:20px; }
+  .pill-nu { display:inline-block; background: rgba(138,155,176,.1); color: var(--muted); font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; padding:2px 9px; border-radius:20px; }
+  .store-code { display:inline-block; background:rgba(245,166,35,.12); color:var(--orange); font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; padding:2px 7px; border-radius:4px; margin-right:5px; }
+  .four-col { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  .bar-card { background: var(--navy-mid); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .bar-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .bar-row:last-child { margin-bottom:0; }
+  .bar-name { font-size:11px; color:var(--muted); width:78px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; text-align:right; }
+  .bar-track { flex:1; height:7px; background:rgba(46,64,87,.5); border-radius:4px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:4px; transition:width .5s ease; }
+  .bar-num { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; color:var(--white); width:58px; flex-shrink:0; }
+  .dash-loading { text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .spin-ring { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @media(max-width:900px) { .four-col { grid-template-columns:1fr 1fr; } }
+  @media(max-width:600px) { .stat-grid { grid-template-columns:1fr 1fr; } .four-col { grid-template-columns:1fr; } .dashboard-wrap { padding:24px 14px 50px; } }
+
+
+  /* ══════════════════ DASHBOARD ══════════════════ */
+  .dashboard-wrap{background:var(--navy-dark);border-top:3px solid var(--orange);padding:40px 20px 80px}
+  .dashboard-inner{max-width:1300px;margin:0 auto}
+  .db-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+  .db-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);margin-bottom:4px}
+  .db-title{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;color:var(--white)}
+  .db-meta{font-size:12px;color:var(--muted);text-align:right}
+  .db-date{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--orange)}
+  .btn-ref{background:transparent;border:1.5px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px 18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+  .btn-ref:hover{border-color:var(--orange);color:var(--orange)}
+
+  /* stat row */
+  .db-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+  .db-stat{background:var(--navy-mid);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+  .db-stat-lbl{font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .db-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:var(--white);line-height:1}
+  .db-stat-val.o{color:var(--orange)}.db-stat-val.g{color:var(--success)}.db-stat-val.b{color:#7fc8e3}
+
+  /* section label */
+  .db-sec-lbl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;margin-top:22px}
+
+  /* tables */
+  .db-tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+  .db-tbl{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+  .db-tbl thead tr{background:rgba(15,30,43,.7)}
+  .db-tbl thead th{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+  .db-tbl thead th.r{text-align:right}
+  .db-tbl tbody tr{border-bottom:1px solid rgba(46,64,87,.4);transition:background .15s}
+  .db-tbl tbody tr:last-child{border-bottom:none}
+  .db-tbl tbody tr:hover{background:rgba(245,166,35,.04)}
+  .db-tbl td{padding:9px 14px;color:var(--white);font-size:13px}
+  .db-tbl td.r{text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600}
+  .db-tbl td.cv{color:var(--orange)}.db-tbl td.cb{color:#7fc8e3}.db-tbl td.cg{color:#a8e6b0}.db-tbl td.cp{color:#c8a8e6}
+  .db-tbl .tot-row{background:rgba(245,166,35,.06);border-top:1px solid var(--border)}
+  .db-tbl .tot-row td{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px}
+
+  /* pills */
+  .pu{display:inline-block;background:rgba(39,174,96,.15);color:var(--success);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px}
+  .pd{display:inline-block;background:rgba(231,76,60,.15);color:#e74c3c;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px}
+  .pn{display:inline-block;background:rgba(138,155,176,.1);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px}
+
+  /* store code badge */
+  .sc{display:inline-block;background:rgba(245,166,35,.12);color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;padding:1px 7px;border-radius:3px;margin-right:5px}
+
+  /* bar charts */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .bar-card{background:var(--navy-mid);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+  .bar-card-lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+  .bar-card-lbl.g{color:var(--success)}.bar-card-lbl.r{color:#e74c3c}.bar-card-lbl.b{color:#7fc8e3}.bar-card-lbl.bd{color:#e74c3c}
+  .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .bar-row:last-child{margin-bottom:0}
+  .bar-nm{font-size:11px;color:var(--muted);width:76px;flex-shrink:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar-tr{flex:1;height:7px;background:rgba(46,64,87,.6);border-radius:4px;overflow:hidden}
+  .bar-fl{height:100%;border-radius:4px;transition:width .6s ease}
+  .bar-vl{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--white);width:58px;flex-shrink:0;text-align:right}
+
+  /* sps chart */
+  .sps-chart-wrap{position:relative;width:100%;height:200px;margin-bottom:16px}
+
+  /* spinner */
+  .db-load{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
+  .spin-ring{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* divider */
+  .db-divider{height:1px;background:var(--border);margin:24px 0}
+
+  @media(max-width:900px){.two-col{grid-template-columns:1fr}}
+  @media(max-width:600px){.db-stats{grid-template-columns:1fr 1fr 1fr}.dashboard-wrap{padding:24px 14px 50px}}
+
+
+  /* ── STORE FILTER ── */
+  .db-filter-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;padding:14px 18px;background:var(--navy-mid);border:1px solid var(--border);border-radius:10px}
+  .db-filter-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  .db-filter-select{background:var(--navy-dark);border:1.5px solid var(--border);border-radius:8px;color:var(--white);font-family:'Barlow',sans-serif;font-size:14px;font-weight:500;padding:8px 36px 8px 12px;outline:none;cursor:pointer;transition:border-color .2s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a9bb0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;min-width:200px}
+  .db-filter-select:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(245,166,35,.12)}
+  .db-filter-select option{background:var(--navy-dark);color:var(--white)}
+  .db-filter-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px}
+  .db-filter-clear{background:transparent;border:none;color:var(--orange);cursor:pointer;font-size:16px;line-height:1;padding:0;margin-left:2px;opacity:.7;transition:opacity .2s}
+  .db-filter-clear:hover{opacity:1}
+  .db-filter-count{font-size:12px;color:var(--muted);margin-left:auto;white-space:nowrap}
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <!-- SVG Logo — Alan Scott Retail Limited (pixel-accurate) -->
+  <svg width="200" height="68" viewBox="0 0 200 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Row 1: "Alan Scott" with orange circle replacing first "o" in Scott -->
+    <!-- "Alan Sc" segment -->
+    <text x="26" y="16" font-family="'Barlow', sans-serif" font-weight="700" font-size="14" fill="#ffffff" text-anchor="middle" letter-spacing="0.3">Alan Sc</text>
+    <!-- Orange circle (the "o") centered around x=58 -->
+    <circle cx="59" cy="11" r="7" fill="#f5a623"/>
+    <!-- Upward chart line inside circle -->
+    <polyline points="55.5,14 58,11.5 60,13 63,8.5" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- "tt" after circle -->
+    <text x="70" y="16" font-family="'Barlow', sans-serif" font-weight="700" font-size="14" fill="#ffffff" letter-spacing="0.3">tt</text>
+
+    <!-- Row 2: RETAIL — large condensed bold -->
+    <!-- Full RETAIL text but we'll hide the dot of "i" and replace with orange square -->
+    <!-- RETA rendered together -->
+    <text x="0" y="54" font-family="'Barlow Condensed', sans-serif" font-weight="900" font-size="44" fill="#ffffff" letter-spacing="1">RETA</text>
+    <!-- "i" stem only — we manually draw it without dot -->
+    <!-- Draw rectangle for i-stem -->
+    <rect x="122" y="27" width="8" height="27" rx="0" fill="#ffffff"/>
+    <!-- Orange square replacing i-dot -->
+    <rect x="122" y="16" width="9" height="9" rx="1.5" fill="#f5a623"/>
+    <!-- "L" after i -->
+    <text x="133" y="54" font-family="'Barlow Condensed', sans-serif" font-weight="900" font-size="44" fill="#ffffff" letter-spacing="1">L</text>
+
+    <!-- Row 3: LIMITED -->
+    <text x="100" y="66" font-family="'Barlow Condensed', sans-serif" font-weight="400" font-size="10.5" fill="#8a9bb0" text-anchor="middle" letter-spacing="5">LIMITED</text>
+  </svg>
+  <div class="header-divider"></div>
+  <span class="header-title">Store Sales Portal</span>
+  <div class="header-time">
+    <div class="current-time" id="clock">--:--</div>
+    <div class="current-date" id="dateline">Loading...</div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+  <div class="page-heading">Hourly Reporting</div>
+  <div class="page-title">Sales Entry Form</div>
+
+  <!-- LOCK OVERLAY -->
+  <div class="lock-overlay" id="lockOverlay">
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title">Entry Submitted</div>
+    <div class="lock-msg">This hour's data has been recorded. Next slot opens at:</div>
+    <div class="next-unlock" id="nextUnlockTime">—</div>
+  </div>
+
+  <!-- STORE INFO CARD -->
+  <div class="card" id="storeCard">
+    <div class="card-title">Store Information</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Store <span class="req">*</span></label>
+        <select id="storeSelect" required>
+          <option value="">— Select Store —</option>
+          <option value="INAH|BATHINDA">BATHINDA (INAH)</option>
+          <option value="INJ7|Surat Adajan">Surat Adajan (INJ7)</option>
+          <option value="INV6|MUSSOORIE">MUSSOORIE (INV6)</option>
+          <option value="INI5|Shimla">Shimla (INI5)</option>
+          <option value="IN9V|DEHARADUN">DEHRADUN (IN9V)</option>
+          <option value="INAJ|GOA">GOA (INAJ)</option>
+          <option value="INI8|BHOPAL">BHOPAL (INI8)</option>
+          <option value="INBK|Haldwani">Haldwani (INBK)</option>
+          <option value="INL8|BORIVALI">BORIVALI (INL8)</option>
+          <option value="INZ2|LULU MALL HYD">LULU MALL HYD (INZ2)</option>
+          <option value="INH7|INDORE">INDORE (INH7)</option>
+          <option value="ING9|JALANDHAR">JALANDHAR (ING9)</option>
+          <option value="INS2|VESU">VESU (INS2)</option>
+          <option value="IN1Z|Patiala">Patiala (IN1Z)</option>
+          <option value="INK2|JAMMU">JAMMU (INK2)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date <span class="req">*</span></label>
+        <input type="date" id="dateInput" required>
+      </div>
+      <div class="form-group full">
+        <label>Manager Name <span class="req">*</span></label>
+        <input type="text" id="managerName" placeholder="Enter manager's full name" required>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOUR ENTRY CARD -->
+  <div class="card" id="hourCard">
+    <div class="card-title">Hourly Data Entry</div>
+
+    <div class="progress-label">
+      <span id="progressText">0 of 14 slots submitted today</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progressBar" style="width:0%"></div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 18px;">
+      <label>Hour Slot <span class="req">*</span></label>
+      <select id="hourSelect" required>
+        <option value="">— Select Hour —</option>
+        <option value="10:00">10:00 AM – 11:00 AM</option>
+        <option value="11:00">11:00 AM – 12:00 PM</option>
+        <option value="12:00">12:00 PM – 01:00 PM</option>
+        <option value="13:00">01:00 PM – 02:00 PM</option>
+        <option value="14:00">02:00 PM – 03:00 PM</option>
+        <option value="15:00">03:00 PM – 04:00 PM</option>
+        <option value="16:00">04:00 PM – 05:00 PM</option>
+        <option value="17:00">05:00 PM – 06:00 PM</option>
+        <option value="18:00">06:00 PM – 07:00 PM</option>
+        <option value="19:00">07:00 PM – 08:00 PM</option>
+        <option value="20:00">08:00 PM – 09:00 PM</option>
+        <option value="21:00">09:00 PM – 10:00 PM</option>
+        <option value="22:00">10:00 PM – 11:00 PM</option>
+        <option value="23:00">11:00 PM – 12:00 AM</option>
+      </select>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Sales Amount (₹) <span class="req">*</span></label>
+        <input type="number" id="salesAmount" placeholder="e.g. 45000" min="0" required>
+      </div>
+      <div class="form-group">
+        <label>No. of Transactions <span class="req">*</span></label>
+        <input type="number" id="transactions" placeholder="e.g. 32" min="0" required>
+      </div>
+      <div class="form-group full">
+        <label>Staff on Floor <span class="req">*</span></label>
+        <input type="number" id="staffCount" placeholder="e.g. 8" min="0" required>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">
+      ⬆ Submit This Hour's Data
+    </button>
+  </div>
+</div>
+<!-- ══════════════════ LIVE DASHBOARD ══════════════════ -->
+<div class="dashboard-wrap">
+  <div class="dashboard-inner">
+
+    <div class="db-header">
+      <div>
+        <div class="db-label">Live Analytics</div>
+        <div class="db-title">All Stores Sales Dashboard</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div class="db-meta">
+          <div class="db-date" id="dbDate">—</div>
+          <div>Refreshed: <span id="dbRefreshed">—</span></div>
+        </div>
+        <button class="btn-ref" id="dbRefBtn" onclick="loadDashboard()">
+          <span id="dbRefIcon" style="display:inline-block;font-size:16px">&#8635;</span> Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="db-stats">
+      <div class="db-stat"><div class="db-stat-lbl">Total Sales Today</div><div class="db-stat-val o" id="dsSales">—</div></div>
+      <div class="db-stat"><div class="db-stat-lbl">Total Transactions</div><div class="db-stat-val b" id="dsTxn">—</div></div>
+      <div class="db-stat"><div class="db-stat-lbl">Stores Reported</div><div class="db-stat-val g" id="dsStores">—</div></div>
+      <div class="db-stat"><div class="db-stat-lbl">Slots Submitted</div><div class="db-stat-val" id="dsSlots">—</div></div>
+      <div class="db-stat"><div class="db-stat-lbl">Avg Transaction Value</div><div class="db-stat-val o" id="dsAtv">—</div></div>
+    </div>
+
+    <!-- STORE FILTER -->
+    <div class="db-filter-bar">
+      <span class="db-filter-label">&#128269; Filter by Store</span>
+      <select class="db-filter-select" id="dbStoreFilter" onchange="applyFilter()">
+        <option value="">All Stores (15)</option>
+        <option value="INAH|BATHINDA">BATHINDA (INAH)</option>
+        <option value="INJ7|Surat Adajan">Surat Adajan (INJ7)</option>
+        <option value="INV6|MUSSOORIE">MUSSOORIE (INV6)</option>
+        <option value="INI5|Shimla">Shimla (INI5)</option>
+        <option value="IN9V|DEHRADUN">DEHRADUN (IN9V)</option>
+        <option value="INAJ|GOA">GOA (INAJ)</option>
+        <option value="INI8|BHOPAL">BHOPAL (INI8)</option>
+        <option value="INBK|Haldwani">Haldwani (INBK)</option>
+        <option value="INL8|BORIVALI">BORIVALI (INL8)</option>
+        <option value="INZ2|LULU MALL HYD">LULU MALL HYD (INZ2)</option>
+        <option value="INH7|INDORE">INDORE (INH7)</option>
+        <option value="ING9|JALANDHAR">JALANDHAR (ING9)</option>
+        <option value="INS2|VESU">VESU (INS2)</option>
+        <option value="IN1Z|Patiala">Patiala (IN1Z)</option>
+        <option value="INK2|JAMMU">JAMMU (INK2)</option>
+      </select>
+      <div id="dbFilterTag" style="display:none" class="db-filter-tag">
+        <span id="dbFilterTagText">All Stores</span>
+        <button class="db-filter-clear" onclick="clearFilter()" title="Clear filter">&#10005;</button>
+      </div>
+      <span class="db-filter-count" id="dbFilterCount"></span>
+    </div>
+
+    <!-- COMPARISON TABLE -->
+    <div class="db-sec-lbl">&#128200; Store Comparison — Today vs Yesterday vs Last Week</div>
+    <div class="db-tbl-wrap" id="dbCompWrap">
+      <div class="db-load"><div class="spin-ring"></div>Loading...</div>
+    </div>
+
+    <div class="db-divider"></div>
+
+    <!-- TOP/BOTTOM SALES -->
+    <div class="db-sec-lbl">&#127942; Sales Rankings</div>
+    <div class="two-col">
+      <div class="bar-card">
+        <div class="bar-card-lbl g">&#9650; Top 5 Stores — Sales</div>
+        <div id="dbT5S"><div class="db-load" style="padding:20px"><div class="spin-ring"></div></div></div>
+      </div>
+      <div class="bar-card">
+        <div class="bar-card-lbl r">&#9660; Bottom 5 Stores — Sales</div>
+        <div id="dbB5S"><div class="db-load" style="padding:20px"><div class="spin-ring"></div></div></div>
+      </div>
+    </div>
+
+    <!-- TOP/BOTTOM TXN -->
+    <div class="db-sec-lbl" style="margin-top:14px">&#128203; Transaction Rankings</div>
+    <div class="two-col">
+      <div class="bar-card">
+        <div class="bar-card-lbl b">&#9650; Top 5 Stores — Transactions</div>
+        <div id="dbT5T"><div class="db-load" style="padding:20px"><div class="spin-ring"></div></div></div>
+      </div>
+      <div class="bar-card">
+        <div class="bar-card-lbl bd">&#9660; Bottom 5 Stores — Transactions</div>
+        <div id="dbB5T"><div class="db-load" style="padding:20px"><div class="spin-ring"></div></div></div>
+      </div>
+    </div>
+
+    <!-- TOP/BOTTOM ATV -->
+    <div class="db-sec-lbl" style="margin-top:14px">&#127919; ATV Rankings (Avg Transaction Value = Sales &#247; Transactions)</div>
+    <div class="two-col">
+      <div class="bar-card">
+        <div class="bar-card-lbl g">&#9650; Top 5 Stores — ATV</div>
+        <div id="dbT5A"><div class="db-load" style="padding:20px"><div class="spin-ring"></div></div></div>
+      </div>
+      <div class="bar-card">
+        <div class="bar-card-lbl r">&#9660; Bottom 5 Stores — ATV</div>
+        <div id="dbB5A"><div class="db-load" style="padding:20px"><div class="spin-ring"></div></div></div>
+      </div>
+    </div>
+
+    <div class="db-divider"></div>
+
+    <!-- SALES PER STAFF CHART -->
+    <div class="db-sec-lbl">&#128100; Hourly Sales per Staff (&#8377; per staff member)</div>
+    <div class="sps-chart-wrap">
+      <canvas id="dbSpsChart" role="img" aria-label="Bar chart showing rupees of sales per staff member for each hour slot">Sales per staff per hour data.</canvas>
+    </div>
+
+    <!-- SALES PER STAFF TABLE -->
+    <div class="db-tbl-wrap" id="dbSpsWrap">
+      <div class="db-load"><div class="spin-ring"></div>Loading...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">&#10003; Data submitted successfully!</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+  // ── Clock ──
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    document.getElementById('dateline').textContent =
+      now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // ── Set today's date ──
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('dateInput').value = today;
+  document.getElementById('dateInput').max = today;
+
+  // ── Auto-select current hour ──
+  const currentHour = new Date().getHours();
+  const hourSelect = document.getElementById('hourSelect');
+  for (let opt of hourSelect.options) {
+    if (opt.value && parseInt(opt.value) === currentHour) {
+      opt.selected = true;
+      break;
+    }
+  }
+
+  // ── Submission tracking (in-session) ──
+  const submitted = {};
+
+  function getSlotKey(store, date, hour) {
+    return `${store}|${date}|${hour}`;
+  }
+
+  function updateProgress() {
+    const store = document.getElementById('storeSelect').value;
+    const date = document.getElementById('dateInput').value;
+    if (!store || !date) return;
+
+    let count = 0;
+    for (let h = 10; h <= 23; h++) {
+      if (submitted[getSlotKey(store, date, h + ':00')]) count++;
+    }
+    const pct = Math.round((count / 14) * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${count} of 14 slots submitted today`;
+    document.getElementById('progressPct').textContent = pct + '%';
+  }
+
+  function checkLock() {
+    const store = document.getElementById('storeSelect').value;
+    const date = document.getElementById('dateInput').value;
+    const hour = document.getElementById('hourSelect').value;
+    if (!store || !date || !hour) return;
+
+    const key = getSlotKey(store, date, hour);
+    const lockOverlay = document.getElementById('lockOverlay');
+    const hourCard = document.getElementById('hourCard');
+
+    if (submitted[key]) {
+      const nextH = parseInt(hour) + 1;
+      const nextLabel = nextH < 24
+        ? `${nextH > 12 ? nextH - 12 : nextH}:00 ${nextH >= 12 ? 'PM' : 'AM'}`
+        : 'End of Day';
+      document.getElementById('nextUnlockTime').textContent = nextLabel;
+      lockOverlay.classList.add('show');
+      hourCard.style.opacity = '0.4';
+      hourCard.style.pointerEvents = 'none';
+    } else {
+      lockOverlay.classList.remove('show');
+      hourCard.style.opacity = '1';
+      hourCard.style.pointerEvents = 'auto';
+    }
+  }
+
+  document.getElementById('storeSelect').addEventListener('change', () => { updateProgress(); checkLock(); });
+  document.getElementById('hourSelect').addEventListener('change', checkLock);
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function handleSubmit() {
+    const store = document.getElementById('storeSelect').value;
+    const date = document.getElementById('dateInput').value;
+    const manager = document.getElementById('managerName').value.trim();
+    const hour = document.getElementById('hourSelect').value;
+    const sales = document.getElementById('salesAmount').value;
+    const txn = document.getElementById('transactions').value;
+    const staff = document.getElementById('staffCount').value;
+
+    if (!store) return alert('Please select a store.');
+    if (!manager) return alert('Please enter manager name.');
+    if (!hour) return alert('Please select the hour slot.');
+    if (!sales) return alert('Please enter sales amount.');
+    if (!txn) return alert('Please enter number of transactions.');
+    if (!staff) return alert('Please enter staff count.');
+
+    const storeParts = store.split('|');
+    const storeCode = storeParts[0];
+    const storeName = storeParts[1];
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Submitting...';
+
+    const payload = {
+      storeCode, storeName, date, manager, hour, sales, txn, staff,
+      timestamp: new Date().toISOString()
+    };
+
+    // ── REPLACE THIS URL WITH YOUR DEPLOYED APPS SCRIPT WEB APP URL ──
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwRgjyjwIPCSuro67Vlla92X8ZlIj_c-l9wgOdIA1j3fNVR1xc9TQ1MLuK0ArLDgH0G/exec';
+
+    // Step 1: Check server if this store+date+hour was already submitted
+    fetch(`${APPS_SCRIPT_URL}?action=check&storeCode=${storeCode}&date=${date}&hour=${encodeURIComponent(hour)}`)
+    .then(res => res.json())
+    .then(checkResult => {
+      if (checkResult.alreadySubmitted) {
+        // BLOCKED — already submitted on server
+        submitted[getSlotKey(store, date, hour)] = true;
+        updateProgress();
+        checkLock();
+        btn.disabled = false;
+        btn.textContent = '⬆ Submit This Hour\'s Data';
+        showToast('⛔ Already submitted for this hour!');
+        return;
+      }
+
+      // Step 2: Not a duplicate — go ahead and submit
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        submitted[getSlotKey(store, date, hour)] = true;
+        showToast('✓ Hour data submitted successfully!');
+        updateProgress();
+        checkLock();
+        document.getElementById('salesAmount').value = '';
+        document.getElementById('transactions').value = '';
+        document.getElementById('staffCount').value = '';
+        btn.disabled = false;
+        btn.textContent = '⬆ Submit This Hour\'s Data';
+      })
+      .catch(() => {
+        alert('Submission failed. Please check your internet connection.');
+        btn.disabled = false;
+        btn.textContent = '⬆ Submit This Hour\'s Data';
+      });
+    })
+    .catch(() => {
+      // If check fails, still try to submit — server will block duplicate anyway
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        submitted[getSlotKey(store, date, hour)] = true;
+        showToast('✓ Hour data submitted successfully!');
+        updateProgress();
+        checkLock();
+        document.getElementById('salesAmount').value = '';
+        document.getElementById('transactions').value = '';
+        document.getElementById('staffCount').value = '';
+        btn.disabled = false;
+        btn.textContent = '⬆ Submit This Hour\'s Data';
+      })
+      .catch(() => {
+        alert('Submission failed. Please check your internet connection.');
+        btn.disabled = false;
+        btn.textContent = '⬆ Submit This Hour\'s Data';
+      });
+    });
+  }
+
+  // ══════════════════ DASHBOARD JS ══════════════════
+  const DASH_URL = 'https://script.google.com/macros/s/AKfycbwRgjyjwIPCSuro67Vlla92X8ZlIj_c-l9wgOdIA1j3fNVR1xc9TQ1MLuK0ArLDgH0G/exec';
+  let _today=[], _yest=[], _lwk=[], _spsChart=null;
+
+  function _fmtK(n){
+    n=Math.round(Number(n)||0);
+    if(n>=10000000) return '\u20b9'+(n/10000000).toFixed(1)+'Cr';
+    if(n>=100000) return '\u20b9'+(n/100000).toFixed(1)+'L';
+    if(n>=1000) return '\u20b9'+(n/1000).toFixed(0)+'K';
+    return '\u20b9'+n;
+  }
+  function _fmtF(n){ return '\u20b9'+Math.round(Number(n)||0).toLocaleString('en-IN'); }
+  function _dateOff(d){ const dt=new Date(); dt.setDate(dt.getDate()+d); return dt.toISOString().split('T')[0]; }
+
+  function _pill(cur,prev){
+    if(!prev||prev===0) return '<span class="pn">N/A</span>';
+    const g=((cur-prev)/prev*100);
+    const s=g>=0?'+':'';
+    return g>=0
+      ? '<span class="pu">\u25b2 '+s+g.toFixed(1)+'%</span>'
+      : '<span class="pd">\u25bc '+g.toFixed(1)+'%</span>';
+  }
+
+  function _storeTotals(rows){
+    const m={};
+    rows.forEach(r=>{
+      const k=r.storeCode;
+      if(!m[k]) m[k]={code:r.storeCode,name:r.storeName,sales:0,txn:0,staff:0,hrs:0};
+      m[k].sales+=Number(r.sales)||0;
+      m[k].txn+=Number(r.txn)||0;
+      m[k].staff+=Number(r.staff)||0;
+      m[k].hrs++;
+    });
+    return Object.values(m);
+  }
+
+  function _renderStats(){
+    const rows=_filteredRows(_today);
+    const totS=rows.reduce((a,r)=>a+Number(r.sales||0),0);
+    const totT=rows.reduce((a,r)=>a+Number(r.txn||0),0);
+    const stores=[...new Set(rows.map(r=>r.storeCode))].length;
+    const atv=totT>0?Math.round(totS/totT):0;
+    document.getElementById('dsSales').textContent=_fmtK(totS);
+    document.getElementById('dsTxn').textContent=totT.toLocaleString('en-IN');
+    document.getElementById('dsStores').textContent=_filterCode ? '1 store' : stores+' / 15';
+    document.getElementById('dsSlots').textContent=rows.length;
+    document.getElementById('dsAtv').textContent=_fmtK(atv);
+  }
+
+  function _renderComp(){
+    const tMap={},yMap={},wMap={};
+    _storeTotals(_filteredRows(_today)).forEach(s=>tMap[s.code]=s);
+    _storeTotals(_filteredRows(_yest)).forEach(s=>yMap[s.code]=s);
+    _storeTotals(_filteredRows(_lwk)).forEach(s=>wMap[s.code]=s);
+    const codes=[...new Set([...Object.keys(tMap),...Object.keys(yMap),...Object.keys(wMap)])].sort();
+    if(!codes.length){
+      document.getElementById('dbCompWrap').innerHTML='<div class="db-load">No data submitted today yet.</div>';
+      return;
+    }
+    let h='<table class="db-tbl"><thead><tr>';
+    h+='<th>Store</th>';
+    h+='<th class="r">Today \u20b9</th><th class="r">ATV \u20b9</th><th class="r">Yesterday \u20b9</th><th class="r">D-Growth</th>';
+    h+='<th class="r">Last Week \u20b9</th><th class="r">WoW Growth</th>';
+    h+='</tr></thead><tbody>';
+    codes.forEach(c=>{
+      const t=tMap[c],y=yMap[c],w=wMap[c];
+      const tS=t?t.sales:0,yS=y?y.sales:0,wS=w?w.sales:0;
+      const nm=t?t.name:(y?y.name:(w?w.name:c));
+      h+='<tr>';
+      const tTxn=t?t.txn:0;
+      const tAtv=tTxn>0?Math.round(tS/tTxn):0;
+      h+='<td><span class="sc">'+c+'</span>'+nm+'</td>';
+      h+='<td class="r cv">'+(tS?_fmtF(tS):'\u2014')+'</td>';
+      h+='<td class="r cp">'+(tAtv?_fmtF(tAtv):'\u2014')+'</td>';
+      h+='<td class="r">'+(yS?_fmtF(yS):'\u2014')+'</td>';
+      h+='<td class="r">'+_pill(tS,yS)+'</td>';
+      h+='<td class="r">'+(wS?_fmtF(wS):'\u2014')+'</td>';
+      h+='<td class="r">'+_pill(tS,wS)+'</td>';
+      h+='</tr>';
+    });
+    const totT=Object.values(tMap).reduce((a,r)=>a+r.sales,0);
+    const totY=Object.values(yMap).reduce((a,r)=>a+r.sales,0);
+    const totW=Object.values(wMap).reduce((a,r)=>a+r.sales,0);
+    const gTxn=Object.values(tMap).reduce((a,r)=>a+r.txn,0);
+    const gAtv=gTxn>0?Math.round(totT/gTxn):0;
+    h+='<tr class="tot-row">';
+    h+='<td style="color:var(--orange)">GRAND TOTAL</td>';
+    h+='<td class="r cv">'+_fmtF(totT)+'</td>';
+    h+='<td class="r cp">'+_fmtF(gAtv)+'</td>';
+    h+='<td class="r">'+(totY?_fmtF(totY):'\u2014')+'</td>';
+    h+='<td class="r">'+_pill(totT,totY)+'</td>';
+    h+='<td class="r">'+(totW?_fmtF(totW):'\u2014')+'</td>';
+    h+='<td class="r">'+_pill(totT,totW)+'</td>';
+    h+='</tr>';
+    h+='</tbody></table>';
+    document.getElementById('dbCompWrap').innerHTML=h;
+  }
+
+  function _bars(elId,items,color){
+    const el=document.getElementById(elId);
+    if(!items.length){el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:16px;text-align:center">No data yet</div>';return;}
+    const mx=Math.max(...items.map(i=>i.v));
+    el.innerHTML=items.map(i=>{
+      const pct=mx>0?Math.round(i.v/mx*100):0;
+      const vStr=i.v>999?_fmtK(i.v):String(i.v);
+      return '<div class="bar-row">'
+        +'<span class="bar-nm">'+i.n+'</span>'
+        +'<div class="bar-tr"><div class="bar-fl" style="width:'+pct+'%;background:'+color+'"></div></div>'
+        +'<span class="bar-vl">'+vStr+'</span>'
+        +'</div>';
+    }).join('');
+  }
+
+  function _renderBars(){
+    const tot=_storeTotals(_filteredRows(_today));
+    if(!tot.length){
+      ['dbT5S','dbB5S','dbT5T','dbB5T'].forEach(id=>{
+        document.getElementById(id).innerHTML='<div style="color:var(--muted);font-size:12px;padding:16px;text-align:center">No data yet</div>';
+      });
+      return;
+    }
+    const bySales=[...tot].sort((a,b)=>b.sales-a.sales);
+    const byTxn=[...tot].sort((a,b)=>b.txn-a.txn);
+    _bars('dbT5S',bySales.slice(0,5).map(s=>({n:s.name,v:s.sales})),'#f5a623');
+    _bars('dbB5S',bySales.slice(-5).reverse().map(s=>({n:s.name,v:s.sales})),'#e74c3c');
+    _bars('dbT5T',byTxn.slice(0,5).map(s=>({n:s.name,v:s.txn})),'#7fc8e3');
+    _bars('dbB5T',byTxn.slice(-5).reverse().map(s=>({n:s.name,v:s.txn})),'#e74c3c');
+    const withAtv=tot.map(s=>({...s,atv:s.txn>0?Math.round(s.sales/s.txn):0}));
+    const byAtv=[...withAtv].sort((a,b)=>b.atv-a.atv);
+    _bars('dbT5A',byAtv.slice(0,5).map(s=>({n:s.name,v:s.atv})),'#c8a8e6');
+    _bars('dbB5A',byAtv.slice(-5).reverse().map(s=>({n:s.name,v:s.atv})),'#e74c3c');
+  }
+
+  function _renderSps(){
+    const hourMap={};
+    _filteredRows(_today).forEach(r=>{
+      const k=r.hourRaw+'|'+r.hourSlot;
+      if(!hourMap[k]) hourMap[k]={hr:Number(r.hourRaw),slot:r.hourSlot,sales:0,txn:0,staff:0,stores:0};
+      hourMap[k].sales+=Number(r.sales)||0;
+      hourMap[k].txn+=Number(r.txn)||0;
+      hourMap[k].staff+=Number(r.staff)||0;
+      hourMap[k].stores++;
+    });
+    const hours=Object.values(hourMap).sort((a,b)=>a.hr-b.hr);
+    if(!hours.length){
+      document.getElementById('dbSpsWrap').innerHTML='<div class="db-load">No data yet</div>';
+      if(_spsChart){_spsChart.destroy();_spsChart=null;}
+      return;
+    }
+    const spsVals=hours.map(h=>h.staff>0?Math.round(h.sales/h.staff):0);
+    const maxSps=Math.max(...spsVals)||1;
+    const labels=hours.map(h=>h.slot.replace(' \u2013 ',' -').split(' - ')[0]);
+
+    // Bar chart
+    if(_spsChart){_spsChart.destroy();}
+    _spsChart=new Chart(document.getElementById('dbSpsChart'),{
+      type:'bar',
+      data:{
+        labels,
+        datasets:[{
+          label:'\u20b9/staff',
+          data:spsVals,
+          backgroundColor:spsVals.map(v=>v>=maxSps*.8?'#27ae60':v<=maxSps*.4?'#e74c3c':'#f5a623'),
+          borderRadius:4,
+          borderSkipped:false
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'\u20b9'+Math.round(c.raw).toLocaleString('en-IN')+' per staff'}}},
+        scales:{
+          y:{ticks:{callback:v=>_fmtK(v),color:'#8a9bb0'},grid:{color:'rgba(46,64,87,.4)'},border:{color:'transparent'}},
+          x:{ticks:{autoSkip:false,maxRotation:0,font:{size:11},color:'#8a9bb0'},grid:{display:false},border:{color:'transparent'}}
+        }
+      }
+    });
+
+    // Table
+    let h='<table class="db-tbl"><thead><tr>';
+    h+='<th>Hour Slot</th><th class="r">Stores</th><th class="r">Total Sales</th>';
+    h+='<th class="r">Transactions</th><th class="r">ATV \u20b9</th><th class="r">Avg Staff</th><th class="r">\u20b9/Staff</th><th class="r">Rating</th>';
+    h+='</tr></thead><tbody>';
+    hours.forEach((hr,i)=>{
+      const sps=spsVals[i];
+      const avgStaff=hr.stores>0?Math.round(hr.staff/hr.stores):0;
+      const rating=sps>=maxSps*.8?'<span class="pu">High</span>':sps<=maxSps*.4?'<span class="pd">Low</span>':'<span class="pn">Avg</span>';
+      const spsColor=sps>=maxSps*.8?'#a8e6b0':sps<=maxSps*.4?'#e74c3c':'#c8a8e6';
+      h+='<tr>';
+      const atv=hr.txn>0?Math.round(hr.sales/hr.txn):0;
+      h+='<td style="font-family:Barlow Condensed,sans-serif;font-weight:600">'+hr.slot+'</td>';
+      h+='<td class="r" style="color:var(--muted)">'+hr.stores+'</td>';
+      h+='<td class="r cv">'+_fmtF(hr.sales)+'</td>';
+      h+='<td class="r cb">'+hr.txn.toLocaleString('en-IN')+'</td>';
+      h+='<td class="r cp">'+_fmtF(atv)+'</td>';
+      h+='<td class="r cg">'+avgStaff+'</td>';
+      h+='<td class="r" style="color:'+spsColor+';font-size:15px">'+_fmtF(sps)+'</td>';
+      h+='<td class="r">'+rating+'</td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table>';
+    document.getElementById('dbSpsWrap').innerHTML=h;
+  }
+
+
+  // ── STORE FILTER ──
+  let _filterCode = '';
+  let _filterName = '';
+
+  function _filteredRows(rows) {
+    if (!_filterCode) return rows;
+    return rows.filter(r => r.storeCode === _filterCode);
+  }
+
+  function applyFilter() {
+    const sel = document.getElementById('dbStoreFilter');
+    const val = sel.value;
+    if (!val) {
+      _filterCode = '';
+      _filterName = '';
+    } else {
+      const parts = val.split('|');
+      _filterCode = parts[0];
+      _filterName = parts[1];
+    }
+    // Update filter tag
+    const tag = document.getElementById('dbFilterTag');
+    const tagTxt = document.getElementById('dbFilterTagText');
+    const cnt = document.getElementById('dbFilterCount');
+    if (_filterCode) {
+      tag.style.display = 'inline-flex';
+      tagTxt.textContent = _filterCode + ' — ' + _filterName;
+      const matchRows = _today.filter(r => r.storeCode === _filterCode);
+      cnt.textContent = matchRows.length + ' slot' + (matchRows.length !== 1 ? 's' : '') + ' submitted today';
+    } else {
+      tag.style.display = 'none';
+      cnt.textContent = '';
+    }
+    _renderAll();
+  }
+
+  function clearFilter() {
+    document.getElementById('dbStoreFilter').value = '';
+    applyFilter();
+  }
+
+  function _renderAll(){
+    _renderStats();
+    _renderComp();
+    _renderBars();
+    _renderSps();
+  }
+
+  async function loadDashboard(){
+    const btn=document.getElementById('dbRefBtn');
+    const icon=document.getElementById('dbRefIcon');
+    btn.disabled=true;
+    icon.style.animation='spin .8s linear infinite';
+    document.getElementById('dbDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    try{
+      const todayStr=new Date().toISOString().split('T')[0];
+      const yesterStr=_dateOff(-1);
+      const weekStr=_dateOff(-7);
+      const [r1,r2,r3]=await Promise.all([
+        fetch(DASH_URL+'?action=today&date='+todayStr).then(r=>r.json()),
+        fetch(DASH_URL+'?action=today&date='+yesterStr).then(r=>r.json()),
+        fetch(DASH_URL+'?action=today&date='+weekStr).then(r=>r.json()),
+      ]);
+      _today=(r1.status==='ok'?r1.rows:[])||[];
+      _yest=(r2.status==='ok'?r2.rows:[])||[];
+      _lwk=(r3.status==='ok'?r3.rows:[])||[];
+      _renderAll();
+      document.getElementById('dbRefreshed').textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+    }catch(e){
+      document.getElementById('dbCompWrap').innerHTML='<div class="db-load">Connection error — check your Apps Script URL.</div>';
+    }
+    btn.disabled=false;
+    icon.style.animation='';
+  }
+
+  window.addEventListener('load',loadDashboard);
+  setInterval(loadDashboard,120000);
+
+</script>
+</body>
+</html>
